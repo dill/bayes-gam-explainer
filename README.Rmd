@@ -3,12 +3,14 @@ Example code from "Bayesian views of generalized additive modelling"
 
 This repo contains the code and data to reproduce the examples in the paper [*Bayesian views of generalized additive modelling*](https://arxiv.org/abs/1902.01330).
 
-
+```{r include=FALSE, echo=FALSE}
+library(knitr)
+opts_chunk$set(cache=TRUE, dpi=200)
+```
 
 We begin by loading some useful packages and the data available here contained in `fish.RData`. Processing steps can be found at [this repo](https://github.com/dill/RACE_bering_sea). We also clean-up the column names for easier printing later.
 
-
-```r
+```{r}
 library(mgcv)
 library(ggplot2)
 library(viridis)
@@ -35,15 +37,14 @@ fish$YEAR <- NULL
 
 For this example we only use the data from 2010, so let's select that first:
 
-
-```r
+```{r select-data}
 fish2010 <- subset(fish, Year==2010)
 ```
 
 Now let's fit our three models, using all the available covariates:
 
+```{r selectcompare}
 
-```r
 # fit using "normal" tprs basis
 b_norm <- gam(NUMCPUE ~ s(x, y, k=40, bs="tp") +
                         s(Depth, k=15, bs="tp") +
@@ -68,8 +69,7 @@ b_term_sel <- gam(NUMCPUE ~ s(x, y, k=40) +
 
 We can then duplicate the plot from the paper, showing that the surface temperature smooth is estimated as zero by both the double penalty and shrinkage approaches:
 
-
-```r
+```{r selectcompare-plot1, fig.width=9, fig.height=4}
 # bit of fiddling to put these on single plots
 model_list <- list(b_norm, b_term, b_term_sel)
 names(model_list) <- c("No selection", "Shrinkage smoother", "Extra penalty")
@@ -105,105 +105,12 @@ ggplot(plot_dat, aes(x=covar, group=model, fill=model)) +
   theme(strip.placement = "outside", legend.title=element_text(size=8), legend.text=element_text(size=6))
 ```
 
-![plot of chunk selectcompare-plot1](figure/selectcompare-plot1-1.png)
-
 We can also see that the `summary` shows that the effective degrees of freedom (EDFs) for the surface temperature smooth is almost zero for those models:
 
-
-```r
+```{r summary-comp}
 summary(b_norm)
-```
-
-```
-## 
-## Family: Tweedie(p=1.745) 
-## Link function: log 
-## 
-## Formula:
-## NUMCPUE ~ s(x, y, k = 40, bs = "tp") + s(Depth, k = 15, bs = "tp") + 
-##     s(Bottom, k = 15, bs = "tp") + s(Surface, k = 15, bs = "tp")
-## 
-## Parametric coefficients:
-##             Estimate Std. Error t value Pr(>|t|)    
-## (Intercept)  3.09022    0.06844   45.15   <2e-16 ***
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-## 
-## Approximate significance of smooth terms:
-##               edf Ref.df     F  p-value    
-## s(x,y)     31.651 36.432 5.420  < 2e-16 ***
-## s(Depth)    8.241 10.069 5.121 9.82e-07 ***
-## s(Bottom)  11.115 12.626 4.140 3.81e-06 ***
-## s(Surface)  1.004  1.008 0.035     0.86    
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-## 
-## R-sq.(adj) =  0.277   Deviance explained = 68.7%
-## -REML = 1706.9  Scale est. = 3.4144    n = 376
-```
-
-```r
 summary(b_term)
-```
-
-```
-## 
-## Family: Tweedie(p=1.745) 
-## Link function: log 
-## 
-## Formula:
-## NUMCPUE ~ s(x, y, k = 40, bs = "ts") + s(Depth, k = 15, bs = "ts") + 
-##     s(Bottom, k = 15, bs = "ts") + s(Surface, k = 15, bs = "ts")
-## 
-## Parametric coefficients:
-##             Estimate Std. Error t value Pr(>|t|)    
-## (Intercept)  3.10869    0.06832    45.5   <2e-16 ***
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-## 
-## Approximate significance of smooth terms:
-##                  edf Ref.df     F p-value    
-## s(x,y)     31.017226     39 5.278  <2e-16 ***
-## s(Depth)    7.868991     14 3.765  <2e-16 ***
-## s(Bottom)  10.757123     14 3.605  <2e-16 ***
-## s(Surface)  0.002427     14 0.000    0.94    
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-## 
-## R-sq.(adj) =  0.281   Deviance explained = 68.3%
-## -REML = 1728.9  Scale est. = 3.4342    n = 376
-```
-
-```r
 summary(b_term_sel)
-```
-
-```
-## 
-## Family: Tweedie(p=1.745) 
-## Link function: log 
-## 
-## Formula:
-## NUMCPUE ~ s(x, y, k = 40) + s(Depth, k = 15) + s(Bottom, k = 15) + 
-##     s(Surface, k = 15)
-## 
-## Parametric coefficients:
-##             Estimate Std. Error t value Pr(>|t|)    
-## (Intercept)  3.09795    0.06824    45.4   <2e-16 ***
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-## 
-## Approximate significance of smooth terms:
-##                  edf Ref.df     F p-value    
-## s(x,y)     3.048e+01     39 5.461  <2e-16 ***
-## s(Depth)   7.273e+00     14 3.486  <2e-16 ***
-## s(Bottom)  1.028e+01     14 3.841  <2e-16 ***
-## s(Surface) 1.863e-04     14 0.000   0.868    
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-## 
-## R-sq.(adj) =  0.284   Deviance explained = 68.6%
-## -REML = 1712.4  Scale est. = 3.4121    n = 376
 ```
 
 
@@ -212,8 +119,7 @@ summary(b_term_sel)
 
 Now to illustrate Nychka's point, that the intervals generated using mean +/- se*Z_alpha have good across the function properties (but can under/over cover at the peaks/troughs).
 
-
-```r
+```{r nychka, fig.height=3.5, fig.width=6}
 # First do the simulation approach
 set.seed(3141)
 
@@ -273,8 +179,6 @@ ggplot(plot_dat) +
   coord_cartesian(expand=FALSE)
 ```
 
-![plot of chunk nychka](figure/nychka-1.png)
-
 We can see there's not much between these methods here!
 
 # Example 3: 3.3 Posterior simulation/parametric bootstrap
@@ -283,16 +187,14 @@ Finally we use the general posterior sampling approach to make summaries of a sp
 
 First we fit the model, where we use the tensor product (`te`) to construct a 2D smooth of space (`x`, `y`) and a 1D smooth of time (`Year`). The model knows the dimensions due to the grouping dimension argument (`d=c(2,1)`).
 
-
-```r
+```{r fit-spatiotemporal}
 b_t2 <- gam(NUMCPUE ~ te(x, y, Year, k=10, bs="ts", d=c(2,1)),
             data=fish, family=tw(), method="REML")
 ```
 
 We can then run the Metropolis-Hastings sampler to get posterior samples for the coefficients. Note that some fiddling with `t.df` (degrees of freedom of the proposal $t$-distribution) and `rw.scale` (scale of random walk) is needed to get reasonable acceptance.
 
-
-```r
+```{r sampler}
 set.seed(1971)
 bs <- gam.mh(b_t2, ns=10000, burn=5000, thin=10, t.df=30, rw.scale=0.01)
 ```
@@ -300,8 +202,7 @@ bs <- gam.mh(b_t2, ns=10000, burn=5000, thin=10, t.df=30, rw.scale=0.01)
 Once we have our samples (stored in `bs$bs`) we can construct our predictions, using a similar procedure to the above.
 
 
-
-```r
+```{r sampler-data-mudge}
 # make the grid of stations for each year
 xx <- grid %>%
   arrange(YEAR, STATION)
@@ -328,8 +229,7 @@ for(i in 1:nrow(bs$bs)){
 
 Now we have our summaries, we can do a little processing to get the figure
 
-
-```r
+```{r plotit, fig.width=10, fig.height=5.5}
 # storage for plot data
 plot_dat <- data.frame(Year=sort(unique(xx$Year)))
 
@@ -364,8 +264,6 @@ ggplot() +
                   xlim=range(xx$Year)+c(-1,1), expand=FALSE) +
   theme(legend.position="bottom")
 ```
-
-![plot of chunk plotit](figure/plotit-1.png)
 
 
 
