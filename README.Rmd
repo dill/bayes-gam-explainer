@@ -78,10 +78,10 @@ term_list <- c("s(Depth)", "s(Bottom)", "s(Surface)")
 plot_dat <- c()
 
 # grab the per-smooth effects for each model, using gratias handy
-# evaluate_smooth function to help us
+# smooth_estimates function to help us
 for(this_term in term_list){
   for(i in seq_along(model_list)){
-    this_smoo <- gratia::evaluate_smooth(model_list[[i]], this_term)
+    this_smoo <- gratia::smooth_estimates(model_list[[i]], this_term)
     this_smoo$model <- names(model_list)[i]
     this_smoo$term <- this_term
 
@@ -96,9 +96,9 @@ for(this_term in term_list){
 
 ggplot(plot_dat, aes(x=covar, group=model, fill=model)) +
   # uncertainty band using Nychka's result
-  geom_ribbon(aes(ymin=est-2*se, ymax=est+2*se), alpha=0.4) +
+  geom_ribbon(aes(ymin=.estimate-2*.se, ymax=.estimate+2*.se), alpha=0.4) +
   # mean effect line
-  geom_line(aes(y=est, colour=model)) +
+  geom_line(aes(y=.estimate, colour=model)) +
   labs(y="Effect", fill="Model", colour="Model", x="") +
   facet_wrap(~covname, scale="free", strip.position="bottom") +
   theme_minimal() +
