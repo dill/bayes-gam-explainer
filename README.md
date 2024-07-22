@@ -121,7 +121,7 @@ shrinkage approaches:
       theme_minimal() +
       theme(strip.placement = "outside", legend.title=element_text(size=8), legend.text=element_text(size=6))
 
-![](README_files/figure-markdown_strict/selectcompare-plot1-1.png)
+![](figure/selectcompare-plot1-1.png)
 
 We can also see that the `summary` shows that the effective degrees of
 freedom (EDFs) for the surface temperature smooth is almost zero for
@@ -275,7 +275,7 @@ under/over cover at the peaks/troughs).
       theme_minimal() +
       coord_cartesian(expand=FALSE)
 
-![](README_files/figure-markdown_strict/nychka-1.png)
+![](figure/nychka-1.png)
 
 We can see there’s not much between these methods here!
 
@@ -366,4 +366,4 @@ figure
                       xlim=range(xx$Year)+c(-1,1), expand=FALSE) +
       theme(legend.position="bottom")
 
-![](README_files/figure-markdown_strict/plotit-1.png)
+![](figure/plotit-1.png)
